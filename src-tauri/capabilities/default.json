@@ -1,0 +1,13 @@
+{
+  "identifier": "default",
+  "description": "Main window capabilities",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:tray:default",
+    "core:menu:default",
+    "core:window:default",
+    "dialog:default",
+    "opener:default"
+  ]
+}

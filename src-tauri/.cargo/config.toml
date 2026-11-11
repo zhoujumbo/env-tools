@@ -1,0 +1,3 @@
+# MinGW dlltool 并行跑会互相卡住。windows-sys 的导入库必须串行生成。
+[build]
+jobs = 1
