@@ -11,6 +11,15 @@ if (-not $exe) {
     throw "Missing EnvtsPanel.exe / envdesk.exe. Run: npm run portable"
 }
 
+function Get-AppVersion {
+    $pkg = Join-Path $root "package.json"
+    if (Test-Path $pkg) {
+        $raw = Get-Content $pkg -Raw
+        if ($raw -match '"version"\s*:\s*"([^"]+)"') { return $Matches[1] }
+    }
+    return "0.0.0"
+}
+
 function Find-WebView2Loader {
     $direct = Join-Path $releaseDir "WebView2Loader.dll"
     if (Test-Path $direct) { return $direct }
@@ -21,6 +30,7 @@ function Find-WebView2Loader {
     return $null
 }
 
+$version = Get-AppVersion
 $loader = Find-WebView2Loader
 if (-not $loader) {
     throw "Missing WebView2Loader.dll next to the exe"
@@ -39,7 +49,7 @@ Get-ChildItem $releaseDir -Filter "*.dll" -ErrorAction SilentlyContinue |
     ForEach-Object { Copy-Item $_.FullName (Join-Path $stage $_.Name) }
 
 $readme = @"
-EnvtsPanel portable
+EnvtsPanel portable $version
 ===================
 1. Extract the folder. Keep EnvtsPanel.exe and WebView2Loader.dll together.
 2. Double-click EnvtsPanel.exe
@@ -51,10 +61,12 @@ EnvtsPanel portable
 $utf8NoBom = New-Object System.Text.UTF8Encoding $false
 [System.IO.File]::WriteAllText((Join-Path $stage "README.txt"), $readme, $utf8NoBom)
 
-$zip = Join-Path $outDir ("EnvtsPanel-portable-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".zip")
+$zipName = "EnvtsPanel-$version-win-x64.zip"
+$zip = Join-Path $outDir $zipName
 if (Test-Path $zip) { Remove-Item $zip }
 Compress-Archive -Path $stage -DestinationPath $zip -Force
 Write-Host "OK: $zip"
+Write-Host "version: $version"
 Write-Host "exe: $exe"
 Write-Host "loader: $loader"
 Get-Item $zip | Format-List FullName, Length
